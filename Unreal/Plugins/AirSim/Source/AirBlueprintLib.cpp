@@ -615,7 +615,7 @@ bool UAirBlueprintLib::HasObstacle(const AActor* actor, const FVector& start, co
 bool UAirBlueprintLib::GetObstacle(const AActor* actor, const FVector& start, const FVector& end,
                                    FHitResult& hit, const AActor* ignore_actor, ECollisionChannel collision_channel)
 {
-    hit = FHitResult(ForceInit);
+   // hit = FHitResult(ForceInit);
 
     FCollisionQueryParams trace_params;
     trace_params.AddIgnoredActor(actor);

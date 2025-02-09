@@ -49,10 +49,11 @@ while not_done:
     button = joystick.get_button(0)
     button2 = joystick.get_button(1)
     button3 = joystick.get_button(2)
+    button4 = joystick.get_button(3)
+    if button4 == 1:
+        client.simPause(True)
     if button == 1:
-        client.reset()
-        not_done=False
-        break
+        client.simPause(False)
     if button2 == 1:
         client.reset()
        # not_done=False

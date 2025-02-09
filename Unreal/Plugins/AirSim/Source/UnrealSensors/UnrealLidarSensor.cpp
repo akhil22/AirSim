@@ -76,10 +76,11 @@ void UnrealLidarSensor::getPointCloud(const msr::airlib::Pose& lidar_pose, const
     const float laser_end = std::fmod(360.0f + params.horizontal_FOV_end, 360.0f);
 
     // shoot lasers
-    for (auto laser = 0u; laser < number_of_lasers; ++laser) {
+    ParallelFor(number_of_lasers, [&](unsigned short laser) {
+        //for (auto laser = 0u; laser < number_of_lasers; ++laser) {
         const float vertical_angle = laser_angles_[laser];
 
-         /*for (auto i = 0u; i < points_to_scan_with_one_laser; ++i) {
+        /* for (auto i = 0u; i < points_to_scan_with_one_laser; ++i) {
              const float horizontal_angle = std::fmod(current_horizontal_angle_ + angle_distance_of_laser_measure * i, 360.0f);
 
              // check if the laser is outside the requested horizontal FOV
@@ -90,32 +91,34 @@ void UnrealLidarSensor::getPointCloud(const msr::airlib::Pose& lidar_pose, const
              int segmentationID = -1;
              // shoot laser and get the impact point, if any
              if (shootLaser(lidar_pose, vehicle_pose, laser, horizontal_angle, vertical_angle, params, point, segmentationID)) {
+                 critical.Lock();
                  point_cloud.emplace_back(point.x());
                  point_cloud.emplace_back(point.y());
                  point_cloud.emplace_back(point.z());
                  segmentation_cloud.emplace_back(segmentationID);
+                 critical.Unlock();
              }
-         }*/
-        ParallelFor(points_to_scan_with_one_laser, [&](unsigned short i) {
+        }*/
+         ParallelFor(points_to_scan_with_one_laser, [&](unsigned short i) {
             const float horizontal_angle = std::fmod(current_horizontal_angle_ + angle_distance_of_laser_measure * i, 360.0f);
 
             // check if the laser is outside the requested horizontal FOV
             //if (!VectorMath::isAngleBetweenAngles(horizontal_angle, laser_start, laser_end))
-             //   int a= 10;
+            //   int a= 10;
 
             Vector3r point;
             int segmentationID = -1;
             // shoot laser and get the impact point, if any
             if (shootLaser(lidar_pose, vehicle_pose, laser, horizontal_angle, vertical_angle, params, point, segmentationID)) {
-                  critical.Lock();
-                  point_cloud.emplace_back(point.x());
-                  point_cloud.emplace_back(point.y());
-                  point_cloud.emplace_back(point.z());
-                  segmentation_cloud.emplace_back(segmentationID);
-                  critical.Unlock();
+                critical.Lock();
+                point_cloud.emplace_back(point.x());
+                point_cloud.emplace_back(point.y());
+                point_cloud.emplace_back(point.z());
+                segmentation_cloud.emplace_back(segmentationID);
+                critical.Unlock();
             }
-            });
-    }
+        });
+    });
 
     current_horizontal_angle_ = std::fmod(current_horizontal_angle_ + angle_distance_of_tick, 360.0f);
 
@@ -154,13 +157,13 @@ bool UnrealLidarSensor::shootLaser(const msr::airlib::Pose& lidar_pose, const ms
     if (is_hit) {
         //Store the segmentation id of the hit object.
         auto hitActor = hit_result.GetActor();
-        if (hitActor != nullptr) {
+        /* if (hitActor != nullptr) {
             TArray<UMeshComponent*> meshComponents;
             hitActor->GetComponents<UMeshComponent>(meshComponents);
             for (int i = 0; i < meshComponents.Num(); i++) {
                 segmentationID = segmentationID == -1 ? meshComponents[i]->CustomDepthStencilValue : segmentationID;
             }
-        }
+        }*/
 
         if (false && UAirBlueprintLib::IsInGameThread()) {
             // Debug code for very specific cases.
