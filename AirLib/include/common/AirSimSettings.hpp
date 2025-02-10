@@ -872,7 +872,8 @@ namespace airlib
                 simple_flight_setting->rc.remote_control_id = 0;
                 simple_flight_setting->sensors = sensor_defaults;
                 vehicles[simple_flight_setting->vehicle_name] = std::move(simple_flight_setting);
-                auto physx_car_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("PhysXCar", kVehicleTypePhysXCar));
+                auto physx_car_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("Warthog", kVehicleTypeWarthog));
+               // auto physx_car_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("PhysXCar", kVehicleTypePhysXCar));
                 physx_car_setting->sensors = sensor_defaults;
                 vehicles[physx_car_setting->vehicle_name] = std::move(physx_car_setting);
             }

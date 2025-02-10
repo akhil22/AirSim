@@ -7,11 +7,13 @@
 #include "AirBlueprintLib.h"
 #include "vehicles/multirotor/api/MultirotorApiBase.hpp"
 #include "Vehicles/Car/CarPawnSimApi.h"
+#include "Vehicles/Warthog/WarthogPawnSimApi.h"
 #include "MultirotorPawnSimApi.h"
 #include "physics/PhysicsBody.hpp"
 #include "common/ClockFactory.hpp"
 #include <memory>
 #include "vehicles/car/api/CarRpcLibServer.hpp"
+#include "vehicles/warthog/api/WarthogRpcLibServer.hpp"
 #include "vehicles/multirotor/api/MultirotorRpcLibServer.hpp"
 
 void ASimModeWorldBoth::BeginPlay()
@@ -87,7 +89,9 @@ std::vector<std::unique_ptr<msr::airlib::ApiServerBase>> ASimModeWorldBoth::crea
         getApiProvider(), getSettings().api_server_address, port_drone)));
 
     uint16_t port_car = 41452;
-    api_servers.push_back(std::unique_ptr<msr::airlib::ApiServerBase>(new msr::airlib::CarRpcLibServer(
+    // api_servers.push_back(std::unique_ptr<msr::airlib::ApiServerBase>(new msr::airlib::CarRpcLibServer(
+    //  getApiProvider(), getSettings().api_server_address, port_car)));
+    api_servers.push_back(std::unique_ptr<msr::airlib::WarthogRpcLibServer>(new msr::airlib::WarthogRpcLibServer(
         getApiProvider(), getSettings().api_server_address, port_car)));
     return api_servers;
 #endif
@@ -105,7 +109,17 @@ void ASimModeWorldBoth::getExistingVehiclePawns(TArray<AActor*>& pawns) const
         }
     }
 
-    TArray<AActor*> CarPawns;
+    TArray<AActor*> WarthogPawns;
+    UAirBlueprintLib::FindAllActor<TWarthogPawn>(this, WarthogPawns);
+    for (AActor* cpawn : WarthogPawns) {
+        pawns.Add(cpawn);
+        if (getSettings().simmode_name == "Both") {
+            APawn* vehicle_pawn = static_cast<APawn*>(cpawn);
+            addPawnToMap(vehicle_pawn, AirSimSettings::kVehicleTypeWarthog);
+        }
+    }
+
+    /* TArray<AActor*> CarPawns;
     UAirBlueprintLib::FindAllActor<TCarPawn>(this, CarPawns);
     for (AActor* cpawn : CarPawns) {
         pawns.Add(cpawn);
@@ -113,7 +127,7 @@ void ASimModeWorldBoth::getExistingVehiclePawns(TArray<AActor*>& pawns) const
             APawn* vehicle_pawn = static_cast<APawn*>(cpawn);
             addPawnToMap(vehicle_pawn, AirSimSettings::kVehicleTypePhysXCar);
         }
-    }
+    }*/
 }
 
 bool ASimModeWorldBoth::isVehicleTypeSupported(const std::string& vehicle_type) const
@@ -121,16 +135,21 @@ bool ASimModeWorldBoth::isVehicleTypeSupported(const std::string& vehicle_type) 
     return ((vehicle_type == AirSimSettings::kVehicleTypeSimpleFlight) ||
             (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) ||
             (vehicle_type == AirSimSettings::kVehicleTypePX4) ||
-            (vehicle_type == AirSimSettings::kVehicleTypeArduCopterSolo));
+            (vehicle_type == AirSimSettings::kVehicleTypeArduCopterSolo) ||
+            (vehicle_type == AirSimSettings::kVehicleTypeWarthog));
 }
 std::string ASimModeWorldBoth::getVehiclePawnPathName(const AirSimSettings::VehicleSetting& vehicle_setting) const
 {
     //decide which derived BP to use
     std::string pawn_path = vehicle_setting.pawn_path;
     if (pawn_path == "") {
-        if (vehicle_setting.vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
-            pawn_path = "DefaultCar";
+        if (vehicle_setting.vehicle_type == AirSimSettings::kVehicleTypeWarthog) {
+            pawn_path = "DefaultWarthog";
         }
+
+        /* if (vehicle_setting.vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
+            pawn_path = "DefaultCar";
+        }*/
         else {
             pawn_path = "DefaultQuadrotor";
         }
@@ -140,8 +159,11 @@ std::string ASimModeWorldBoth::getVehiclePawnPathName(const AirSimSettings::Vehi
 PawnEvents* ASimModeWorldBoth::getVehiclePawnEvents(APawn* pawn) const
 {
     std::string vehicle_type = getVehicleType(pawn);
-    if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
+    /* if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
         return static_cast<TCarPawn*>(pawn)->getPawnEvents();
+    }*/
+    if (vehicle_type == AirSimSettings::kVehicleTypeWarthog) {
+        return static_cast<TWarthogPawn*>(pawn)->getPawnEvents();
     }
     else {
         return static_cast<TFlyingPawn*>(pawn)->getPawnEvents();
@@ -151,8 +173,11 @@ const common_utils::UniqueValueMap<std::string, APIPCamera*> ASimModeWorldBoth::
     APawn* pawn) const
 {
     std::string vehicle_type = getVehicleType(pawn);
-    if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
+    /*if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
         return (static_cast<const TCarPawn*>(pawn))->getCameras();
+    }*/
+    if (vehicle_type == AirSimSettings::kVehicleTypeWarthog) {
+        return (static_cast<const TWarthogPawn*>(pawn))->getCameras();
     }
     else {
         return (static_cast<const TFlyingPawn*>(pawn))->getCameras();
@@ -161,8 +186,11 @@ const common_utils::UniqueValueMap<std::string, APIPCamera*> ASimModeWorldBoth::
 void ASimModeWorldBoth::initializeVehiclePawn(APawn* pawn)
 {
     std::string vehicle_type = getVehicleType(pawn);
-    if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
+    /* if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
         static_cast<TCarPawn*>(pawn)->initializeForBeginPlay(getSettings().engine_sound);
+    }*/
+    if (vehicle_type == AirSimSettings::kVehicleTypeWarthog) {
+        static_cast<TWarthogPawn*>(pawn)->initializeForBeginPlay(getSettings().engine_sound);
     }
     else {
         static_cast<TFlyingPawn*>(pawn)->initializeForBeginPlay();
@@ -173,9 +201,16 @@ std::unique_ptr<PawnSimApi> ASimModeWorldBoth::createVehicleSimApi(
 {
     APawn* pawn = pawn_sim_api_params.pawn;
     std::string vehicle_type = getVehicleType(pawn);
-    if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
+    /* if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
         auto vehicle_pawn = static_cast<TCarPawn*>(pawn_sim_api_params.pawn);
         auto vehicle_sim_api = std::unique_ptr<PawnSimApi>(new CarPawnSimApi(pawn_sim_api_params, vehicle_pawn->getKeyBoardControls()));
+        vehicle_sim_api->initialize();
+        // vehicle_sim_api->reset();
+        return vehicle_sim_api;
+    }*/
+    if (vehicle_type == AirSimSettings::kVehicleTypeWarthog) {
+        auto vehicle_pawn = static_cast<TWarthogPawn*>(pawn_sim_api_params.pawn);
+        auto vehicle_sim_api = std::unique_ptr<PawnSimApi>(new WarthogPawnSimApi(pawn_sim_api_params, vehicle_pawn->getKeyBoardControls()));
         vehicle_sim_api->initialize();
         // vehicle_sim_api->reset();
         return vehicle_sim_api;
@@ -193,9 +228,13 @@ msr::airlib::VehicleApiBase* ASimModeWorldBoth::getVehicleApi(const PawnSimApi::
 {
     APawn* pawn = pawn_sim_api_params.pawn;
     std::string vehicle_type = getVehicleType(pawn);
-    if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
+    /* if (vehicle_type == AirSimSettings::kVehicleTypePhysXCar) {
         const auto car_sim_api = static_cast<const CarPawnSimApi*>(sim_api);
         return car_sim_api->getVehicleApi();
+    }*/
+    if (vehicle_type == AirSimSettings::kVehicleTypeWarthog) {
+        const auto warthog_sim_api = static_cast<const WarthogPawnSimApi*>(sim_api);
+        return warthog_sim_api->getVehicleApi();
     }
     else {
         const auto multirotor_sim_api = static_cast<const MultirotorPawnSimApi*>(sim_api);

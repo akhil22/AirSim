@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 
 #include "Vehicles/Car/CarPawn.h"
+#include "Vehicles/Warthog/WarthogPawn.h"
 #include "FlyingPawn.h"
 #include "common/Common.hpp"
 #include "SimMode/SimModeWorldBase.h"
@@ -36,4 +37,5 @@ protected: //overrides
 private:
     typedef ACarPawn TCarPawn;
     typedef AFlyingPawn TFlyingPawn;
+    typedef AWarthogPawn TWarthogPawn;
 };
