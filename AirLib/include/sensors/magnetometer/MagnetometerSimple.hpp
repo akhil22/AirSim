@@ -42,9 +42,9 @@ namespace airlib
             noise_vec_.reset();
 
             freq_limiter_.reset();
-            delay_line_.reset();
+           // delay_line_.reset();
 
-            delay_line_.push_back(getOutputInternal());
+         //   delay_line_.push_back(getOutputInternal());
         }
 
         virtual void update() override
@@ -53,14 +53,17 @@ namespace airlib
 
             freq_limiter_.update();
 
-            if (freq_limiter_.isWaitComplete()) {
+           /* if (freq_limiter_.isWaitComplete()) {
                 delay_line_.push_back(getOutputInternal());
             }
 
-            delay_line_.update();
+            delay_line_.update(); */
 
-            if (freq_limiter_.isWaitComplete())
-                setOutput(delay_line_.getOutput());
+            if (freq_limiter_.isWaitComplete()) {
+
+                //setOutput(delay_line_.getOutput());
+                setOutput(getOutputInternal());
+            }
         }
         //*** End: UpdatableObject implementation ***//
 
