@@ -53,8 +53,8 @@ namespace airlib
             if (!times_.empty() &&
                 ClockBase::elapsedBetween(clock()->nowNanos(), times_.front()) >= delay_) {
 
-                last_value_ = values_.front();
-                last_time_ = times_.front();
+               // last_value_ = values_.front();
+                //last_time_ = times_.front();
 
                 times_.pop_front();
                 values_.pop_front();
