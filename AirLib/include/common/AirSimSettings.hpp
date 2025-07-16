@@ -1336,6 +1336,7 @@ namespace airlib
         static void createDefaultSensorSettings(const std::string& simmode_name,
                                                 std::map<std::string, std::shared_ptr<SensorSetting>>& sensors)
         {
+            return;
             if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeBoth) {
                 sensors["imu"] = createSensorSetting(SensorBase::SensorType::Imu, "imu", true);
                 sensors["magnetometer"] = createSensorSetting(SensorBase::SensorType::Magnetometer, "magnetometer", true);
