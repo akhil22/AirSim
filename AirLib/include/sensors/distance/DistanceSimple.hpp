@@ -31,7 +31,7 @@ namespace airlib
 
             //initialize frequency limiter
             freq_limiter_.initialize(params_.update_frequency, params_.startup_delay);
-            delay_line_.initialize(params_.update_latency);
+          //  delay_line_.initialize(params_.update_latency);
         }
 
         //*** Start: UpdatableState implementation ***//
@@ -41,9 +41,9 @@ namespace airlib
             uncorrelated_noise_.reset();
 
             freq_limiter_.reset();
-            delay_line_.reset();
+           //delay_line_.reset();
 
-            delay_line_.push_back(getOutputInternal());
+           // delay_line_.push_back(getOutputInternal());
         }
 
         virtual void update() override
@@ -52,14 +52,15 @@ namespace airlib
 
             freq_limiter_.update();
 
-            if (freq_limiter_.isWaitComplete()) {
-                delay_line_.push_back(getOutputInternal());
-            }
+           // if (freq_limiter_.isWaitComplete()) {
+            //    delay_line_.push_back(getOutputInternal());
+           // }
 
-            delay_line_.update();
+           // delay_line_.update();
 
             if (freq_limiter_.isWaitComplete())
-                setOutput(delay_line_.getOutput());
+               // setOutput(delay_line_.getOutput());
+                setOutput(getOutputInternal());
         }
         //*** End: UpdatableState implementation ***//
 

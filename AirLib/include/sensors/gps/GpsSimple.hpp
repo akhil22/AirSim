@@ -39,7 +39,7 @@ namespace airlib
         virtual void resetImplementation() override
         {
             freq_limiter_.reset();
-            delay_line_.reset();
+          //  delay_line_.reset();
 
             eph_filter.reset();
             epv_filter.reset();
@@ -56,7 +56,7 @@ namespace airlib
             epv_filter.update();
 
             if (freq_limiter_.isWaitComplete()) { //update output
-                addOutputToDelayLine(eph_filter.getOutput(), epv_filter.getOutput());
+                setOutput(addOutputToDelayLine(eph_filter.getOutput(), epv_filter.getOutput()));
             }
 
            // delay_line_.update();
